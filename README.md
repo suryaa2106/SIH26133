@@ -70,5 +70,3 @@ While this repository contains the rapid prototype, the production architecture 
    Open your browser and navigate to `http://127.0.0.1:5000/`
 
 ---
-
-*Built with ❤️ for Smart India Hackathon*
