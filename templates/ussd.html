@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MedReach - USSD Simulator</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #333; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: monospace; }
+        .phone { width: 300px; height: 600px; background-color: #222; border-radius: 30px; padding: 20px; box-shadow: inset 0 0 10px #000, 0 0 20px rgba(0,0,0,0.5); position: relative; }
+        .screen { background-color: #9bbc0f; height: 250px; border-radius: 10px; padding: 15px; overflow-y: auto; color: #0f380f; font-weight: bold; font-size: 16px; white-space: pre-wrap; display: flex; flex-direction: column; }
+        .messages { flex-grow: 1; }
+        .input-area { border-top: 1px dashed #0f380f; padding-top: 5px; margin-top: 10px; display: none; }
+        .keypad { margin-top: 30px; display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
+        .key { background-color: #444; color: white; border: none; padding: 15px; border-radius: 5px; font-size: 20px; font-weight: bold; cursor: pointer; transition: 0.1s; }
+        .key:active { background-color: #666; }
+        .home-btn { position: absolute; top: 10px; left: -60px; color: white; text-decoration: none; }
+        .helper-text { text-align: center; color: #888; font-family: sans-serif; position: absolute; bottom: -30px; width: 100%; left: 0;}
+    </style>
+</head>
+<body>
+    <a href="/" class="home-btn">← Back</a>
+    <div class="phone">
+        <div class="screen">
+            <div class="messages" id="messages">Dial *444# to start.</div>
+            <div class="input-area" id="input-area">
+                > <span id="user-input"></span><span class="cursor">_</span>
+            </div>
+        </div>
+        <div class="keypad">
+            <button class="key" onclick="typeChar('1')">1</button>
+            <button class="key" onclick="typeChar('2')">2</button>
+            <button class="key" onclick="typeChar('3')">3</button>
+            <button class="key" onclick="typeChar('4')">4</button>
+            <button class="key" onclick="typeChar('5')">5</button>
+            <button class="key" onclick="typeChar('6')">6</button>
+            <button class="key" onclick="typeChar('7')">7</button>
+            <button class="key" onclick="typeChar('8')">8</button>
+            <button class="key" onclick="typeChar('9')">9</button>
+            <button class="key" onclick="typeChar('*')">*</button>
+            <button class="key" onclick="typeChar('0')">0</button>
+            <button class="key" onclick="typeChar('#')">#</button>
+            <button class="key" style="background-color: #8b0000;" onclick="clearInput()">CLR</button>
+            <button class="key" style="grid-column: span 2; background-color: #006400;" onclick="sendUSSD()">SEND</button>
+        </div>
+        <div class="helper-text">You can type directly on your physical keyboard</div>
+    </div>
+
+    <script>
+        let currentInput = "";
+        const inputSpan = document.getElementById("user-input");
+        const messagesDiv = document.getElementById("messages");
+        const inputArea = document.getElementById("input-area");
+        
+        let sessionId = "session_" + Math.random().toString(36).substring(7);
+
+        // --- NEW: Physical Keyboard Support ---
+        document.addEventListener('keydown', function(event) {
+            // Ignore if using modifier keys (Ctrl, Alt, Meta) to preserve browser shortcuts
+            if (event.ctrlKey || event.altKey || event.metaKey) return;
+            
+            if (event.key.length === 1) { // Any standard typed character
+                typeChar(event.key);
+            } else if (event.key === 'Backspace') {
+                currentInput = currentInput.slice(0, -1);
+                inputSpan.innerText = currentInput;
+            } else if (event.key === 'Enter') {
+                sendUSSD();
+            }
+        });
+
+        function typeChar(char) {
+            currentInput += char;
+            inputSpan.innerText = currentInput;
+            inputArea.style.display = "block";
+        }
+
+        function clearInput() {
+            currentInput = "";
+            inputSpan.innerText = "";
+        }
+
+        async function sendUSSD() {
+            const text = currentInput;
+            if(!text) return; // Prevent empty submits
+
+            clearInput();
+            inputArea.style.display = "none";
+            
+            messagesDiv.innerHTML = "Loading...";
+
+            const res = await fetch('/api/ussd', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ text: text, session_id: sessionId })
+            });
+            const data = await res.json();
+            
+            messagesDiv.innerText = data.message;
+            
+            if (data.type === 'end') {
+                sessionId = "session_" + Math.random().toString(36).substring(7); // reset session
+            } else if (data.type === 'input') {
+                inputArea.style.display = "block"; // Keep input cursor visible
+            }
+        }
+    </script>
+</body>
+</html>

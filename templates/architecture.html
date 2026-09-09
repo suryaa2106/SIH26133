@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Technical Architecture</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .arch-card { border-left: 4px solid #0d6efd; margin-bottom: 20px; background: white; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); padding: 20px;}
+        .tech-badge { font-size: 0.9rem; margin-right: 5px; margin-bottom: 5px; }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-fluid">
+            <span class="navbar-brand mb-0 h1"><a href="/" style="color: white; text-decoration: none;">←</a> Under the Hood: Technical Architecture</span>
+        </div>
+    </nav>
+
+    <div class="container mt-4">
+        <div class="row">
+            <div class="col-md-12 text-center mb-4">
+                <h3 class="text-primary">Production Tech Stack & API Integrations</h3>
+                <p class="text-muted">How we scale this prototype for the Government of Maharashtra</p>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- USSD Gateway -->
+            <div class="col-md-6">
+                <div class="arch-card" style="border-left-color: #198754;">
+                    <h5>📱 USSD & IVR Gateway Integration</h5>
+                    <p class="small text-muted mb-2"><strong>Problem Solved:</strong> Digital divide and smartphone dependency.</p>
+                    <p class="small">In production, our simulated USSD is replaced by telecom integrations using the SS7 protocol. We maintain session state using Redis. When a session drops, IVR voice-fallback triggers automatically.</p>
+                    <div>
+                        <span class="badge bg-secondary tech-badge">Africa's Talking API</span>
+                        <span class="badge bg-secondary tech-badge">Gupshup</span>
+                        <span class="badge bg-secondary tech-badge">Redis (State Mgmt)</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Triage -->
+            <div class="col-md-6">
+                <div class="arch-card" style="border-left-color: #0dcaf0;">
+                    <h5>🤖 Multilingual AI Triage Pipeline</h5>
+                    <p class="small text-muted mb-2"><strong>Problem Solved:</strong> Language barriers and doctor workload.</p>
+                    <p class="small">Patient input (Marathi/Hindi) is captured via text or ASR (Voice-to-Text). It passes through the Govt of India's <strong>Bhashini API</strong> for translation, then feeds into a Clinical Decision Support System (CDSS) based on WHO/ICMR triage protocols.</p>
+                    <div>
+                        <span class="badge bg-secondary tech-badge">Bhashini API (Govt. of India)</span>
+                        <span class="badge bg-secondary tech-badge">Python FastAPI</span>
+                        <span class="badge bg-secondary tech-badge">NLP / Rule-based CDSS</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ABDM / FHIR -->
+            <div class="col-md-6">
+                <div class="arch-card" style="border-left-color: #ffc107;">
+                    <h5>📋 ABDM & FHIR R4 Compliance</h5>
+                    <p class="small text-muted mb-2"><strong>Problem Solved:</strong> Fragmented patient histories.</p>
+                    <p class="small">We do not create a siloed database. Every health record is stored using the global <strong>HL7 FHIR R4</strong> standard. Our platform integrates with the Ayushman Bharat Digital Mission (ABDM) Sandbox for ABHA ID creation and consent management (M1, M2, M3 milestones).</p>
+                    <div>
+                        <span class="badge bg-secondary tech-badge">ABDM Sandbox APIs</span>
+                        <span class="badge bg-secondary tech-badge">HAPI FHIR Server</span>
+                        <span class="badge bg-secondary tech-badge">ABHA Consent Framework</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Offline PWA -->
+            <div class="col-md-6">
+                <div class="arch-card" style="border-left-color: #d81b60;">
+                    <h5>📶 Offline-First ASHA Companion App</h5>
+                    <p class="small text-muted mb-2"><strong>Problem Solved:</strong> Low internet connectivity in remote villages.</p>
+                    <p class="small">Built as a Progressive Web App (PWA). Data is saved locally on the device using IndexedDB when offline. Background Service Workers utilize a Conflict-Free Replicated Data Type (CRDT) approach to sync to the cloud automatically when a 3G/4G signal is detected.</p>
+                    <div>
+                        <span class="badge bg-secondary tech-badge">React Native / Flutter</span>
+                        <span class="badge bg-secondary tech-badge">IndexedDB / PouchDB</span>
+                        <span class="badge bg-secondary tech-badge">Service Workers</span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- WebRTC Teleconsultation -->
+            <div class="col-md-12">
+                <div class="arch-card" style="border-left-color: #6f42c1;">
+                    <h5>🩺 Low-Bandwidth Teleconsultation</h5>
+                    <p class="small text-muted mb-2"><strong>Problem Solved:</strong> Video calls dropping on 2G/3G networks.</p>
+                    <p class="small">We use WebRTC for peer-to-peer encrypted video. It relies on localized STUN/TURN servers to penetrate village NATs. If bandwidth drops below 200kbps, the system automatically degrades to an audio-only fallback while maintaining the live vitals sync WebSocket.</p>
+                    <div>
+                        <span class="badge bg-secondary tech-badge">WebRTC</span>
+                        <span class="badge bg-secondary tech-badge">WebSockets (Live Vitals)</span>
+                        <span class="badge bg-secondary tech-badge">Coturn Servers</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
